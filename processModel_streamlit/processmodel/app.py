@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 
 # --- 1. 页面基础配置 ---
 st.set_page_config(
-    page_title="AURA v2.6 构造器",
+    page_title="CoRePro 构造器",
     page_icon="🤖",
     layout="centered"
 )
@@ -56,7 +56,7 @@ if api_key:
     if "messages" not in st.session_state:
         st.session_state.messages = [
             {"role": "assistant",
-             "content": "你好！我是AURA v2.6。请用自然语言描述您想创建的企业级工作流，例如：“设计一个员工差旅报销流程、设计一个蛋炒饭流程。”"}
+             "content": "你好！我是CoRePro。请用自然语言描述您想创建的企业级工作流，例如：“请帮我设计一个员工差旅报销流程”"}
         ]
 
     # 初始化用于存储当前工作流的会话状态
@@ -79,7 +79,7 @@ if api_key:
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("正在分析您的需求并激活AURA核心构造器..."):
+            with st.spinner("正在分析您的需求并激活CoRePro核心构造器..."):
                 time.sleep(2)
             system_content = '''
             You are a decision-maker. Based on the user's input, you determine which category it belongs to.
