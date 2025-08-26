@@ -30,7 +30,7 @@ class Config:
     Gemini_MODEL: str = "gemini-2.0-flash"
     TEMPERATURE: float = 0
 
-st.title("AURA v2.6  🤖")
+st.title("CoRePro 构造器  🤖")
 st.markdown("---")
 
 
@@ -2185,7 +2185,7 @@ if api_key:
                         # 更新会话状态中的工作流
                         st.session_state.current_workflow_ir = modified_ir
 else:
-    st.warning("请输入您的 Google Gemini API Key 以启动 AURA 构造器。")
+    st.warning("请输入您的 Google Gemini API Key 以启动 CoRePro 构造器。")
     st.info("您可以从 Google AI for Developers 网站获取您的 API Key。")
 
 
