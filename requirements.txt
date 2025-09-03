@@ -3,3 +3,4 @@ google-genai
 google-generativeai
 langchain-community
 langchain
+google-search-results
