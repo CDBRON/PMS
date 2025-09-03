@@ -13,6 +13,24 @@ from GPTClient import GPTClient
 import xml.etree.ElementTree as ET
 
 
+
+# --- 这部分代码保持不变，放在您的 Python 脚本顶部 ---
+from langchain_community.utilities import SerpAPIWrapper
+from langchain.tools import Tool
+
+# 假设您已经在 .env 文件中设置了 SERPAPI_API_KEY
+# load_dotenv() 应该已经执行过了
+
+# 1. 创建一个搜索工具实例
+search_api = SerpAPIWrapper(serpapi_api_key="9117d9d03f08785a96d06fecd65e9234b384b5df3e9e07a3ad6b13e1636d4ae8")
+
+# 2. 将其包装成一个专用的工具
+industry_search_tool = Tool(
+    name="IndustryBestPracticeSearch",
+    func=search_api.run,
+    description="It is used when you need to understand the standards, best practices or common steps of a specific industry or business process. This tool can access the Internet to obtain the latest and real-world information."
+)
+
 # --- 1. 页面基础配置 ---
 st.set_page_config(
     page_title="CoRePro 构造器",
@@ -205,12 +223,53 @@ if api_key:
                     '''
 
                     with st.expander("步骤 1.1: BPMN专家架构师 A 生成组件清单", expanded=True):
-                        with st.spinner("BPMN专家架构师A正在设计流程组件..."):
-                            messages_A = [{'role': 'system', 'content': debater_A_system_prompt},
-                                          {'role': 'user', 'content': f"User Request: '{user_prompt}'"}]
+                        # --- 阶段 1: 直接调用外部工具获取背景知识 ---
+                        st.markdown("#### 步骤 1.1: 直接调用外部工具获取背景知识")
+                        tool_output = ""  # 初始化工具输出
+                        with st.spinner("正在为您的需求搜索外部资料..."):
+                            # 1. 直接根据用户输入构建一个更有效的搜索查询
+                            search_query = f"Standard business process steps and best practices for '{user_prompt}'"
+                            st.info(f"自动生成的搜索查询: `{search_query}`")
+
+                            try:
+                                # 2. 直接执行工具（调用您定义的Python函数）
+                                tool_output = industry_search_tool.run(search_query)
+                                st.success("外部信息获取成功！")
+
+                                st.markdown("##### 查看获取到的研究资料:")
+                                st.text_area(
+                                    label="研究资料",
+                                    value=tool_output,
+                                    height=150,
+                                    label_visibility="collapsed"
+                                )
+                            except Exception as e:
+                                st.error(f"工具调用失败，将仅基于内置知识进行设计。错误: {e}")
+                                tool_output = "外部资料获取失败。"  # 即使失败也要提供信息
+
+                            # --- 阶段 2: 专家架构师进行最终设计 ---
+                        st.markdown("#### 步骤 1.2: BPMN专家架构师 A 生成组件清单")
+                        with st.spinner("BPMN专家架构师A正在整合外部信息并设计流程组件..."):
+                            # 3. 构造一个增强的用户提示，将研究结果包含进去
+                            final_user_prompt = f"""
+                                    User Request: '{user_prompt}'
+
+                                    [Context from External Research]
+                                    Here is some background information obtained from an internet search. You MUST use this information to ensure your design is comprehensive and based on real-world practices.
+                                    ---
+                                    {tool_output}
+                                    ---
+                                    Please use the original request and the research context above to inform your final design.
+                                    """
+                            # 4. 准备LLM调用，使用您原来的强大提示词
+                            messages_A = [
+                                {'role': 'system', 'content': debater_A_system_prompt},
+                                {'role': 'user', 'content': final_user_prompt}
+                            ]
+                            # 5. LLM调用，生成最终的组件清单
                             opinion_A = gpt_client.chat_completion(str(messages_A), temperature=0)
                             opinion_A = opinion_A.strip().replace("```python", "").replace("```", "")
-                        st.info("架构师 A 的观点 (BPMN专家版):")
+                        st.info("架构师 A 的最终设计方案 (BPMN专家版):")
                         st.code(opinion_A, language="python")
 
                     # --- 后续的辩手B和法官逻辑保持不变，它们将在这个高质量的清单基础上工作 ---
