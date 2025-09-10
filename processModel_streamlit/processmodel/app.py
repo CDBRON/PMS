@@ -46,7 +46,7 @@ class Config:
     # MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY")
     # Gemini_API_KEY: str = os.getenv("Gemini_API_KEY")
     MISTRAL_MODEL: str = "mistral-large-latest"
-    Gemini_MODEL: str = "gemini-2.0-flash"
+    Gemini_MODEL: str = "gemini-2.5-flash-lite"
     TEMPERATURE: float = 0
 
 
